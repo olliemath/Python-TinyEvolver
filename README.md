@@ -72,4 +72,4 @@ Methods:
 - `islandmodel.amalg_pop()` this returns the islands amalgamated into a single large population
 - `islandmodel.select_pop()` this selects a population from across the islands whose size is that of a single island
 - `islandmodel.evolve([ngen, matepb, mutpb, indpb, verbose, mig_freq])` this evolves all the islands, with individuals migrating between islands every `mig_freq` generations. See the `evolve` method for the `Population` class.
-- `islandmodel.multi_evolve([ngen, matepb, mutpb, indpb, verbose, mig_freq])` this is the same as the evolve method, but uses multiprocessing
+- `islandmodel.multi_evolve([ngen, matepb, mutpb, indpb, verbose, mig_freq])` this is the same as the `evolve` method, but uses multiprocessing.
