@@ -18,6 +18,16 @@ can be generated on the fly or from old data, and one can evolve many population
 once with multiprocessing. 
 
 ## Installation
+Installation requires Python 2.6+ or Python 3.4+.
+
+To install from source, simply clone into a directory, then from that directory run
+```
+python setup.py install
+```
+or, if you'd prefer to be able to edit the installed code yourself:
+```
+python setup.py develop
+```
 
 ## Example
 ```python
