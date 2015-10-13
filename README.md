@@ -11,8 +11,8 @@ algorithms in models and applications, but not necessarily become researchers in
 genetic/evolutionary algorithms themselves. You define the things that are really
 unique to your problem and TinyEvolver does the rest.
 
-The source code for TinyEvolver is inspired, at least in part, by the DEAP module, but
-we've made conscious decisions to tailor our module towards simplicity and lightness.
+The source code for TinyEvolver is inspired, at least in part, by the [DEAP](https://github.com/deap/deap)
+module, but we've made conscious decisions to tailor our module towards simplicity and lightness.
 But simple doesn't mean featureless - individuals can have genes of mixed type, populations
 can be generated on the fly or from old data, and one can evolve many populations at
 once with multiprocessing. 
@@ -32,8 +32,11 @@ p.evolve()
 print p.best.genes
 ```
 
+## Tips
+The majority of the work in constructing an evolutionary algorithm in TinyEvolver is the fitness function - and this is where the majority of the work is done by the CPU. You can thus speed up your code by speeding up the fitness function, whether that be by outsourcing to NumPy, writing C extensions, or simply making your function more efficient. Since TinyEvolver is written in pure Python, you could also run it under [PyPy](http://pypy.org/).
+
 ## Documentation
-TinyEvolve contains 3 classes: Individual, Population and IslandModel. A Population is a collection of Individuals and an IslandModel is a collection of Populations - both of these classes have methods for evolving.
+TinyEvolver contains 3 classes: Individual, Population and IslandModel. A Population is a collection of Individuals and an IslandModel is a collection of Populations - both of these classes have methods for evolving with all variables having sensible defaults.
 
 ### Individual
 Users should not need to create an instance of this class directly.
