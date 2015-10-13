@@ -4,7 +4,7 @@ try:
     from setuptools import setup, find_packages
 except ImportError:
     print("warning: you do not have setuptools installed - cannot use \"develop\" option")
-    from disutils.core import setup
+    from distutils.core import setup
 
 here = path.abspath(path.dirname(__file__))
 
