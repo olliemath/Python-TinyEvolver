@@ -1,5 +1,5 @@
 from tinyevolver import Population, IslandModel
-import cPickle as pickle
+import pickle
 
 """
     This is a repeat of example 1, except that we have a saved population
@@ -28,4 +28,4 @@ i = IslandModel(islands)
 if __name__ == "__main__":
 
     i.multi_evolve()
-    print "Best individual had fitness", i.best.fitness
+    print("Best individual had fitness {}".format(i.best.fitness))

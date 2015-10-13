@@ -15,11 +15,10 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from __future__ import print_function
 from copy import copy
 import random
 
-from core import Population, Select
+from .core import Population, Select
 from multiprocessing import Pipe, Process, Queue
 from collections import deque
 
