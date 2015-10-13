@@ -26,6 +26,7 @@ from tinyevolver.core import Population, Evolve
 prototype = [False for _ in range(100)]
 p = Population(prototype=prototype, gene_bounds=None, fitness_func=sum)
 
+p.populate()
 Evolve(p)
 
 print p.best.genes
