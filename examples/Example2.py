@@ -17,7 +17,7 @@ islands = [Population(prototype, None, sum) for _ in range(2)]
 with open('data.pkl', 'rb') as f:
     data = pickle.load(f)
 
-# We put the data in the first population:
+# We put the data in the first island:
 islands[0].populate(base_population=data)
 # and randomly populate the second:
 islands[1].populate()
