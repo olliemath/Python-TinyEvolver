@@ -262,8 +262,8 @@ class Population(object):
                 fits = [ind.fitness for ind in self]
                 mean = float(sum(fits)) / len(fits)
                 sqdev = [(f - mean) ** 2 for f in fits]
-                print("--- Generation {} ---".format(gen))
-                print("    Fitest: {} --- Variance: {} ".format(max(fits), sum(sqdev) / len(sqdev)))
+                print("--- Generation %d ---" % gen)
+                print("    Fitest: %f --- Variance: %f " % (max(fits), sum(sqdev) / len(sqdev)))
 
     def step(self, ngen=40, gen=0, matepb=0.3, mutpb=0.2, indpb=0.05, verbose=True):
         """ This evolves the population exactly one generation, and passes the gen/ngen
@@ -282,7 +282,7 @@ class Population(object):
             fits = [ind.fitness for ind in self]
             mean = float(sum(fits)) / len(fits)
             sqdev = [(f - mean) ** 2 for f in fits]
-            print("    Fitest: {} --- Variance: {} ".format(max(fits), sum(sqdev) / len(sqdev)))
+            print("    Fitest: %f --- Variance: %f" % (max(fits), sum(sqdev) / len(sqdev)))
 
 
 # Select best individuals

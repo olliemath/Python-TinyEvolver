@@ -101,7 +101,7 @@ class IslandModel(object):
         """ This evolves the islands and periodically cross-pollinates them. """
         for gen in range(ngen):
             if verbose:
-                print("--- Generation {} ---".format(gen))
+                print("--- Generation %d ---" % gen)
             for pop in self.islands:
                 pop.step(ngen, gen, matepb, mutpb, indpb, verbose)
             if gen % mig_freq == 0:
@@ -113,7 +113,7 @@ class IslandModel(object):
 
         for gen in range(ngen):
             if verbose:
-                print("--- Island {}, Generation {} ---".format(proc_no, gen))
+                print("--- Island %d, Generation %d ---" % (proc_no, gen))
             pop.step(ngen, gen, matepb, mutpb, indpb, verbose)
             if gen % mig_freq == 0:
                 MigratePipe(pop, mig_freq, pipe_in, pipe_out)

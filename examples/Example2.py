@@ -28,4 +28,4 @@ i = IslandModel(islands)
 if __name__ == "__main__":
 
     i.multi_evolve()
-    print("Best individual had fitness {}".format(i.best.fitness))
+    print("Best individual had fitness %f" % i.best.fitness)
