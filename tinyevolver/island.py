@@ -130,7 +130,6 @@ class IslandModel(object):
         pipes_in = deque(pipe[0] for pipe in pipes)
         pipes_out = deque(pipe[1] for pipe in pipes)
         pipes_in.rotate(1)
-        pipes_out.rotate(-1)
 
         q = Queue()
 

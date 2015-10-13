@@ -173,57 +173,57 @@ def Mutator(g, bounds):
 class Population(object):
     def __init__(self, prototype, gene_bounds, fitness_func):
         self.individuals = []
-        self.prototype = prototype
-        self.indsize = len(prototype)
+        self._prototype = prototype
+        self._indsize = len(prototype)
         if gene_bounds:
             if len(gene_bounds) != len(prototype):
                 raise ValueError("len(prototype) != len(bounds)")
             else:
-                self.bounds = gene_bounds
+                self._bounds = gene_bounds
         else:
-            self.bounds = [None for _ in range(self.indsize)]
-        self.fitness = fitness_func
-        self.typecode = typecodes[type(prototype[0])] if len(set([type(g) for g in prototype])) == 1 else None
-        self.generators = [Generator(g, self.bounds[N]) for N, g in enumerate(prototype)]
-        self.maters = [Mater(g) for g in prototype]
-        self.mutators = [Mutator(g, self.bounds[N]) for N, g in enumerate(prototype)]
+            self._bounds = [None for _ in range(self._indsize)]
+        self._fitness = fitness_func
+        self._typecode = typecodes[type(prototype[0])] if len(set([type(g) for g in prototype])) == 1 else None
+        self._generators = [Generator(g, self._bounds[N]) for N, g in enumerate(prototype)]
+        self._maters = [Mater(g) for g in prototype]
+        self._mutators = [Mutator(g, self._bounds[N]) for N, g in enumerate(prototype)]
         self.best = None
 
-    def generator(self):
-        return [self.generators[N]() for N in range(self.indsize)]
+    def _generator(self):
+        return [self._generators[N]() for N in range(self._indsize)]
 
     def populate(self, popsize=300, base_population=None):
         if base_population:
             self.popsize = len(base_population)
-            if self.typecode:
-                self.individuals = [Individual(array(self.typecode, ind)) for ind in base_population]
+            if self._typecode:
+                self.individuals = [Individual(array(self._typecode, ind)) for ind in base_population]
             else:
                 self.individuals = [Individual(list(ind)) for ind in base_population]
         else:
             self.popsize = popsize
-            if self.typecode:
-                self.individuals = [Individual(array(self.typecode, self.generator())) for _ in range(popsize)]
+            if self._typecode:
+                self.individuals = [Individual(array(self._typecode, self._generator())) for _ in range(popsize)]
             else:
-                self.individuals = [Individual(self.generator()) for _ in range(self.popsize)]
-        self.evaluate()
+                self.individuals = [Individual(self._generator()) for _ in range(self.popsize)]
+        self._evaluate()
 
-    def mate(self, ind1, ind2):
-        cutoff = random.randint(1, self.indsize-1)
+    def _mate(self, ind1, ind2):
+        cutoff = random.randint(1, self._indsize-1)
         a = random.random()
         b = 1 - a
-        for N in range(self.indsize):
-            ind1[N], ind2[N] = self.maters[N](ind1, ind2, N, a, b, cutoff)
+        for N in range(self._indsize):
+            ind1[N], ind2[N] = self._maters[N](ind1, ind2, N, a, b, cutoff)
         del ind1.fitness
         del ind2.fitness
 
-    def mutate(self, ind, gen, ngen, indpb):
-        for N in range(self.indsize):
-            ind[N] = self.mutators[N](ind, N, gen, ngen, indpb)
+    def _mutate(self, ind, gen, ngen, indpb):
+        for N in range(self._indsize):
+            ind[N] = self._mutators[N](ind, N, gen, ngen, indpb)
 
-    def evaluate(self):
+    def _evaluate(self):
         for ind in self.individuals:
             if not ind.valid:
-                ind.fitness = self.fitness(ind)
+                ind.fitness = self._fitness(ind)
         # Also update the record of the best individual
         best = max(self.individuals, key=lambda ind: ind.fitness)
         if not self.best or best.fitness > self.best.fitness:
@@ -242,7 +242,7 @@ class Population(object):
         return iter(self.individuals)
 
     def __copy__(self):
-        new = Population(self.prototype, self.bounds, self.fitness)
+        new = Population(self._prototype, self._bounds, self._fitness)
         new.populate(base_population=[copy(ind) for ind in self.individuals])
         return new
 
@@ -251,12 +251,12 @@ class Population(object):
             self.individuals = Select(self)
             for ind1, ind2 in zip(self[::2], self[1::2]):
                 if random.random() < matepb:
-                    self.mate(ind1, ind2)
+                    self._mate(ind1, ind2)
                 if random.random() < mutpb:
-                    self.mutate(ind1, gen, ngen, indpb)
+                    self._mutate(ind1, gen, ngen, indpb)
                 if random.random() < mutpb:
-                    self.mutate(ind2, gen, ngen, indpb)
-            self.evaluate()
+                    self._mutate(ind2, gen, ngen, indpb)
+            self._evaluate()
 
             if verbose:
                 fits = [ind.fitness for ind in self]
@@ -271,12 +271,12 @@ class Population(object):
         self.individuals = Select(self)
         for ind1, ind2 in zip(self[::2], self[1::2]):
             if random.random() < matepb:
-                self.mate(ind1, ind2)
+                self._mate(ind1, ind2)
             if random.random() < mutpb:
-                self.mutate(ind1, gen, ngen, indpb)
+                self._mutate(ind1, gen, ngen, indpb)
             if random.random() < mutpb:
-                self.mutate(ind2, gen, ngen, indpb)
-        self.evaluate()
+                self._mutate(ind2, gen, ngen, indpb)
+        self._evaluate()
 
         if verbose:
             fits = [ind.fitness for ind in self]
