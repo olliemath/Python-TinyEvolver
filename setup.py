@@ -1,7 +1,7 @@
 # Always prefer setuptools over distutils
 from os import path
 try:
-    from setuptools import setup, find_packages
+    from setuptools import setup
 except ImportError:
     print("warning: you do not have setuptools installed - cannot use \"develop\" option")
     from distutils.core import setup
@@ -49,5 +49,5 @@ setup(
 
     keywords='genetic algorithms optimization',
 
-    packages=find_packages(),
+    packages=['tinyevolver'],
 )
