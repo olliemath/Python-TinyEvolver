@@ -1,4 +1,4 @@
-from tinyevolver.core import Population, Evolve
+from tinyevolver import Population
 import random
 try:
     import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ def fitness(ind):
 # Now to populate and evolve:
 p = Population(prototype, bounds, fitness)
 p.populate()
-Evolve(p)
+p.evolve()
 
 # Let's see how we did:
 if plt:

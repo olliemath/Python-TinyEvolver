@@ -1,4 +1,4 @@
-from tinyevolver.core import Population, Evolve
+from tinyevolver import Population
 
 """
     In this example we consider individuals consisting entirely of random
@@ -9,10 +9,10 @@ from tinyevolver.core import Population, Evolve
 prototype = [False for _ in range(100)]
 
 # This statement initialises a population class with appropriate methods.
-p = Population(prototype=prototype, bounds=None, fitness_func=sum)
+p = Population(prototype=prototype, gene_bounds=None, fitness_func=sum)
 
 # Create the desired number of individuals in the class:
 p.populate(popsize=300)
 
 # Evolve! It's as simple as that.
-Evolve(p, verbose=True)
+p.evolve(verbose=True)

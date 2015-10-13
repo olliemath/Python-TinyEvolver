@@ -1,5 +1,4 @@
-from tinyevolver.core import Population
-from tinyevolver.island import IslandModel
+from tinyevolver import Population, IslandModel
 import cPickle as pickle
 
 """

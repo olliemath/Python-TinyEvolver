@@ -1,4 +1,4 @@
-from tinyevolver.core import Population, Evolve
+from tinyevolver import Population
 import numpy as np
 
 """
@@ -26,7 +26,7 @@ def fitness(ind):
 # Now we're good to go:
 p = Population(prototype, bounds, fitness)
 p.populate(500)
-Evolve(p, ngen=50)
+p.evolve(ngen=50)
 
 
 # If you have matplotlib installed, we can plot the best result:

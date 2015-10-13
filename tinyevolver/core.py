@@ -5,8 +5,8 @@ import random
 
 
 class Individual(object):
-    """ An 'indivudal' class. Behaves like/is initialised with array/list of genes
-        with a collection of methods for recording fitness. """
+    """ An 'indivudal' class. Behaves like/is initialised with array/list of genes.
+        Contains methods for recording fitness. """
     def __init__(self, gene_list):
         self.genes = gene_list
         self._fitness = None
@@ -155,15 +155,15 @@ def Mutator(g, bounds):
 
 # Population class with methods for generate, mate, mutate
 class Population(object):
-    def __init__(self, prototype, bounds, fitness_func):
+    def __init__(self, prototype, gene_bounds, fitness_func):
         self.individuals = []
         self.prototype = prototype
         self.indsize = len(prototype)
-        if bounds:
-            if len(bounds) != len(prototype):
+        if gene_bounds:
+            if len(gene_bounds) != len(prototype):
                 raise ValueError("len(prototype) != len(bounds)")
             else:
-                self.bounds = bounds
+                self.bounds = gene_bounds
         else:
             self.bounds = [None for _ in range(self.indsize)]
         self.fitness = fitness_func
@@ -230,6 +230,44 @@ class Population(object):
         new.populate(base_population=[copy(ind) for ind in self.individuals])
         return new
 
+    def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, verbose=True):
+        for gen in range(ngen):
+            self.individuals = Select(self)
+            for ind1, ind2 in zip(self[::2], self[1::2]):
+                if random.random() < matepb:
+                    self.mate(ind1, ind2)
+                if random.random() < mutpb:
+                    self.mutate(ind1, gen, ngen, indpb)
+                if random.random() < mutpb:
+                    self.mutate(ind2, gen, ngen, indpb)
+            self.evaluate()
+
+            if verbose:
+                fits = [ind.fitness for ind in self]
+                mean = float(sum(fits)) / len(fits)
+                sqdev = [(f - mean) ** 2 for f in fits]
+                print("--- Generation {} ---".format(gen))
+                print("    Fitest: {} --- Variance: {} ".format(max(fits), sum(sqdev) / len(sqdev)))
+
+    def step(self, ngen=40, gen=0, matepb=0.3, mutpb=0.2, indpb=0.05, verbose=True):
+        """ This evolves the population exactly one generation, and passes the gen/ngen
+            parameters to any functions that require it. """
+        self.individuals = Select(self)
+        for ind1, ind2 in zip(self[::2], self[1::2]):
+            if random.random() < matepb:
+                self.mate(ind1, ind2)
+            if random.random() < mutpb:
+                self.mutate(ind1, gen, ngen, indpb)
+            if random.random() < mutpb:
+                self.mutate(ind2, gen, ngen, indpb)
+        self.evaluate()
+
+        if verbose:
+            fits = [ind.fitness for ind in self]
+            mean = float(sum(fits)) / len(fits)
+            sqdev = [(f - mean) ** 2 for f in fits]
+            print("    Fitest: {} --- Variance: {} ".format(max(fits), sum(sqdev) / len(sqdev)))
+
 
 # Select best individuals
 def Select(pop, tournsize=3, newsize=None):
@@ -239,43 +277,3 @@ def Select(pop, tournsize=3, newsize=None):
         copy(max(random.sample(list(pop), tournsize), key=lambda ind: ind.fitness))
         for _ in range(newsize)
     ]
-
-
-def Evolve(pop, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, verbose=True):
-    for gen in range(ngen):
-        pop.individuals = Select(pop)
-        for ind1, ind2 in zip(pop[::2], pop[1::2]):
-            if random.random() < matepb:
-                pop.mate(ind1, ind2)
-            if random.random() < mutpb:
-                pop.mutate(ind1, gen, ngen, indpb)
-            if random.random() < mutpb:
-                pop.mutate(ind2, gen, ngen, indpb)
-        pop.evaluate()
-
-        if verbose:
-            fits = [ind.fitness for ind in pop]
-            mean = float(sum(fits)) / len(fits)
-            sqdev = [(f - mean) ** 2 for f in fits]
-            print("--- Generation {} ---".format(gen))
-            print("    Fitest: {} --- Variance: {} ".format(max(fits), sum(sqdev) / len(sqdev)))
-
-
-def Step(pop, ngen=40, gen=0, matepb=0.3, mutpb=0.2, indpb=0.05, verbose=True):
-    """ This evolves the population exactly one generation, and passes the gen/ngen
-        parameters to any functions that require it. """
-    pop.individuals = Select(pop)
-    for ind1, ind2 in zip(pop[::2], pop[1::2]):
-        if random.random() < matepb:
-            pop.mate(ind1, ind2)
-        if random.random() < mutpb:
-            pop.mutate(ind1, gen, ngen, indpb)
-        if random.random() < mutpb:
-            pop.mutate(ind2, gen, ngen, indpb)
-    pop.evaluate()
-
-    if verbose:
-        fits = [ind.fitness for ind in pop]
-        mean = float(sum(fits)) / len(fits)
-        sqdev = [(f - mean) ** 2 for f in fits]
-        print("    Fitest: {} --- Variance: {} ".format(max(fits), sum(sqdev) / len(sqdev)))

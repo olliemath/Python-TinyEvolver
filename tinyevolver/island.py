@@ -2,7 +2,7 @@ from __future__ import print_function
 from copy import copy
 import random
 
-from core import Population, Select, Step
+from core import Population, Select
 from multiprocessing import Pipe, Process, Queue
 from collections import deque
 
@@ -87,7 +87,7 @@ class IslandModel(object):
             if verbose:
                 print("--- Generation {} ---".format(gen))
             for pop in self.islands:
-                Step(pop, ngen, gen, matepb, mutpb, indpb, verbose)
+                pop.step(ngen, gen, matepb, mutpb, indpb, verbose)
             if gen % mig_freq == 0:
                 Migrate(self.islands, mig_freq)
 
@@ -98,7 +98,7 @@ class IslandModel(object):
         for gen in range(ngen):
             if verbose:
                 print("--- Island {}, Generation {} ---".format(proc_no, gen))
-            Step(pop, ngen, gen, matepb, mutpb, indpb, verbose)
+            pop.step(ngen, gen, matepb, mutpb, indpb, verbose)
             if gen % mig_freq == 0:
                 MigratePipe(pop, mig_freq, pipe_in, pipe_out)
 
