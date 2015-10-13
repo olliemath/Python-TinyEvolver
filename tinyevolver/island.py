@@ -97,7 +97,7 @@ class IslandModel(object):
 
         for gen in range(ngen):
             if verbose:
-                print("--- Island {}: ".format(proc_no))
+                print("--- Island {}, Generation {} ---".format(proc_no, gen))
             Step(pop, ngen, gen, matepb, mutpb, indpb, verbose)
             if gen % mig_freq == 0:
                 MigratePipe(pop, mig_freq, pipe_in, pipe_out)
