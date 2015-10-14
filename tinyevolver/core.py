@@ -21,8 +21,8 @@ import random
 
 
 class Individual(object):
-    """ An 'indivudal' class. Behaves like/is initialised with array/list of genes.
-        Contains methods for recording fitness. """
+    """ An 'indivudal' class. Behaves like/is initialised with array/list of genes,
+        but also contains methods for recording fitness. """
     def __init__(self, gene_list):
         self.genes = gene_list
         self._fitness = None
@@ -135,7 +135,7 @@ def Mater(g):
 
 # Mutating functions - gene by gene
 def BoolMutate(bounds):
-    def mutator(ind, N, gen, ngen, indpb):
+    def mutator(ind, N, gen, ngen, indpb, scoping):
         if random.random() < indpb:
             return not ind[N]
         return ind[N]
@@ -143,7 +143,7 @@ def BoolMutate(bounds):
 
 
 def IntMutate(bounds):
-    def mutator(ind, N, gen, ngen, indpb):
+    def mutator(ind, N, gen, ngen, indpb, scoping):
         if random.random() < 0.5:
             return ind[N] + min(bounds[1]-ind[N], 1)
         return ind[N] - min(ind[N]-bounds[0], 1)
@@ -151,10 +151,10 @@ def IntMutate(bounds):
 
 
 def FloatMutate(bounds):
-    def mutator(ind, N, gen, ngen, indpb):
+    def mutator(ind, N, gen, ngen, indpb, scoping):
         if random.random() < 0.5:
-            return ind[N] + (bounds[1] - ind[N]) * random.random() * (1 - gen / ngen)
-        return ind[N] - (ind[N] - bounds[0]) * random.random() * (1 - gen / ngen)
+            return ind[N] + (bounds[1] - ind[N]) * random.random() * (1 - gen / ngen) ** scoping
+        return ind[N] - (ind[N] - bounds[0]) * random.random() * (1 - gen / ngen) ** scoping
     return mutator
 
 
@@ -216,9 +216,9 @@ class Population(object):
         del ind1.fitness
         del ind2.fitness
 
-    def _mutate(self, ind, gen, ngen, indpb):
+    def _mutate(self, ind, gen, ngen, indpb, scoping):
         for N in range(self._indsize):
-            ind[N] = self._mutators[N](ind, N, gen, ngen, indpb)
+            ind[N] = self._mutators[N](ind, N, gen, ngen, indpb, scoping)
 
     def _evaluate(self):
         for ind in self.individuals:
@@ -246,16 +246,20 @@ class Population(object):
         new.populate(base_population=[copy(ind) for ind in self.individuals])
         return new
 
-    def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, verbose=True):
+    def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True):
         for gen in range(ngen):
-            self.individuals = Select(self)
+            self.individuals = Select(self, tournsize=tournsize)
             for ind1, ind2 in zip(self[::2], self[1::2]):
                 if random.random() < matepb:
                     self._mate(ind1, ind2)
+                    del ind1.fitness
+                    del ind2.fitness
                 if random.random() < mutpb:
-                    self._mutate(ind1, gen, ngen, indpb)
+                    self._mutate(ind1, gen, ngen, indpb, scoping)
+                    del ind1.fitness
                 if random.random() < mutpb:
-                    self._mutate(ind2, gen, ngen, indpb)
+                    self._mutate(ind2, gen, ngen, indpb, scoping)
+                    del ind2.fitness
             self._evaluate()
 
             if verbose:
@@ -265,17 +269,21 @@ class Population(object):
                 print("--- Generation %d ---" % gen)
                 print("    Fitest: %f --- Variance: %f " % (max(fits), sum(sqdev) / len(sqdev)))
 
-    def step(self, ngen=40, gen=0, matepb=0.3, mutpb=0.2, indpb=0.05, verbose=True):
+    def step(self, ngen=40, gen=0, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True):
         """ This evolves the population exactly one generation, and passes the gen/ngen
             parameters to any functions that require it. """
-        self.individuals = Select(self)
+        self.individuals = Select(self, tournsize=tournsize)
         for ind1, ind2 in zip(self[::2], self[1::2]):
             if random.random() < matepb:
                 self._mate(ind1, ind2)
+                del ind1.fitness
+                del ind2.fitness
             if random.random() < mutpb:
-                self._mutate(ind1, gen, ngen, indpb)
+                self._mutate(ind1, gen, ngen, indpb, scoping)
+                del ind1.fitness
             if random.random() < mutpb:
-                self._mutate(ind2, gen, ngen, indpb)
+                self._mutate(ind2, gen, ngen, indpb, scoping)
+                del ind2.fitness
         self._evaluate()
 
         if verbose:
