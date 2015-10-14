@@ -72,7 +72,7 @@ Attributes:
 Methods:
 - Populations have many of the methods of lists: you can get/set their individuals with indices or slices, iterate over them, put them into `len`, copy them, or put them into any other Python function requiring only these.
 - `population.populate([popsize, base_population])` if no `base_population` is passed then this will generate the required number of individuals for the population using its `prototype` and `gene_bounds`. If a family of list-like objects is passed as a `base_population` then the population is populated with these instead.
-- `population.evolve([ngen, matepb, mutpb, indpb, verbose])` this should only be called after the class has been populated. It evolves `ngen` generations, where individuals have a probability `matepb` of mating, `mutpb` of mutating. `indpb` controlls the variability of an individual's genes upon mutation. Set `verbose` to False to avoid printing details of the evolution.
+- `population.evolve([ngen, matepb, mutpb, indpb, scoping, tournsize, verbose])` this should only be called after the class has been populated. It evolves `ngen` generations, where individuals have a probability `matepb` of mating, `mutpb` of mutating. `indpb` controlls the variability of an individual's genes upon mutation. Fitest individuals are selected from random tournaments of size `tournsize`. Set `verbose` to False to avoid printing details of the evolution.
 
 ### IslandModel
 Create an IslandModel instance with `IslandModel(poplist)` where `poplist` is a list of `Population` objects.
@@ -84,5 +84,5 @@ Attributes:
 Methods:
 - `islandmodel.amalg_pop()` this returns the islands amalgamated into a single large population
 - `islandmodel.select_pop()` this selects a population from across the islands whose size is that of a single island
-- `islandmodel.evolve([ngen, matepb, mutpb, indpb, verbose, mig_freq])` this evolves all the islands, with individuals migrating between islands every `mig_freq` generations. See the `evolve` method for the `Population` class.
-- `islandmodel.multi_evolve([ngen, matepb, mutpb, indpb, verbose, mig_freq])` this is the same as the `evolve` method, but uses multiprocessing.
+- `islandmodel.evolve([ngen, matepb, mutpb, indpb, scoping, tournsize, verbose, mig_freq])` this evolves all the islands, with individuals migrating between islands every `mig_freq` generations. See the `evolve` method for the `Population` class.
+- `islandmodel.multi_evolve([ngen, matepb, mutpb, indpb, scoping, tournsize, verbose, mig_freq])` this is the same as the `evolve` method, but uses multiprocessing.
