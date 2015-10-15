@@ -98,7 +98,8 @@ class IslandModel(object):
         return out_pop
 
     def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True, mig_freq=5):
-        """ This evolves the islands and periodically cross-pollinates them. """
+        """ This evolves the islands and cross-pollinates them with mig_size individuals every mig_freq generations.
+        """
         for gen in range(ngen):
             if verbose:
                 print("--- Generation %d ---" % gen)
