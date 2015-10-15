@@ -144,17 +144,15 @@ def BoolMutate(bounds):
 
 def IntMutate(bounds):
     def mutator(ind, N, gen, ngen, indpb, scoping):
-        if random.random() < 0.5:
-            return ind[N] + min(bounds[1]-ind[N], 1)
-        return ind[N] - min(ind[N]-bounds[0], 1)
+        naive = int(ind[N] + random.normal(0, 1))
+        return max(min(naive, bounds[1]), bounds[0])
     return mutator
 
 
 def FloatMutate(bounds):
     def mutator(ind, N, gen, ngen, indpb, scoping):
-        if random.random() < 0.5:
-            return ind[N] + (bounds[1] - ind[N]) * random.random() * (1 - gen / ngen) ** scoping
-        return ind[N] - (ind[N] - bounds[0]) * random.random() * (1 - gen / ngen) ** scoping
+        return random.uniform((ind[N] - bounds[0]) * (1 - gen / ngen) ** scoping,
+                              (bounds[1] - ind[N]) * (1 - gen / ngen) ** scoping)
     return mutator
 
 
