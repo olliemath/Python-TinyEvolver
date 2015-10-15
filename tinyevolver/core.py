@@ -21,8 +21,8 @@ import random
 
 
 class Individual(object):
-    """ An 'indivudal' class. Behaves like/is initialised with array/list of genes,
-        but also contains methods for recording fitness. """
+    """ An 'indivudal' class. Behaves like/is initialised with an array/list of genes,
+        but also contains methods for setting/getting/deleting fitness. """
     def __init__(self, gene_list):
         self.genes = gene_list
         self._fitness = None
@@ -171,6 +171,19 @@ def Mutator(g, bounds):
 
 # Population class with methods for generate, mate, mutate
 class Population(object):
+    """ Population to contain Indivuduals and methods for evolution.
+        Arguments:
+            prototype - a flat list of float, integer or boolean genes
+            bounds - a list of pairs (l, u) of bounds for the selection/mutation of genes
+            fitness_func - a function which takes a flat list of genes and returns a numeric fitness value
+        Methods:
+            populate - add Individuals to this class
+            evolve - evolve the individuals using the generated select, mate, mutate functions
+        Attributes:
+            individuals - a list of Individual instances
+            best - the fittest individual of all time
+    """
+            
     def __init__(self, prototype, gene_bounds, fitness_func):
         self.individuals = []
         self._prototype = prototype
@@ -193,6 +206,11 @@ class Population(object):
         return [self._generators[N]() for N in range(self._indsize)]
 
     def populate(self, popsize=300, base_population=None):
+        """ Add Individuals to the population.
+            Arguments:
+                base_population - if not null, the popsize variable will be ignored and members of this object used as individuals. This should be a Population or a list of items able to be coerced to Individuals.
+                popsize - if base_population is null, then this is the number of Individuals that will be generated ab initio for the Population.
+        """        
         if base_population:
             self.popsize = len(base_population)
             if self._typecode:
@@ -247,6 +265,16 @@ class Population(object):
         return new
 
     def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True):
+        """ Evolve the population in place
+            Arguments:
+                ngen - Positive integer - number of generations to evolve
+                matepb - Float between 0 and 1 - probability of individual mating
+                mutpb - Float between 0 and 1 - probability of individual mutation
+                indpb - Float between 0 and 1 - probability of individual boolean genes flipping
+                scoping - Float non-negative - more positive means a greater decrease in variability of genes as time goes on
+                tournsize - Positive integer - size of random pools to select best individuals from
+                verbose - Boolean - print statistics to screen (note: this may slow the evolution)
+        """
         for gen in range(ngen):
             self.individuals = Select(self, tournsize=tournsize)
             for ind1, ind2 in zip(self[::2], self[1::2]):
@@ -270,8 +298,8 @@ class Population(object):
                 print("    Fitest: %f --- Variance: %f " % (max(fits), sum(sqdev) / len(sqdev)))
 
     def step(self, ngen=40, gen=0, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True):
-        """ This evolves the population exactly one generation, and passes the gen/ngen
-            parameters to any functions that require it. """
+        """ This is similar to the 'evolve' method, but evolves the population exactly one generation. 
+            The ngen and gen parameters are required for scoping (see Population.evolve). """
         self.individuals = Select(self, tournsize=tournsize)
         for ind1, ind2 in zip(self[::2], self[1::2]):
             if random.random() < matepb:
