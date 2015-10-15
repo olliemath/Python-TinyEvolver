@@ -19,7 +19,6 @@ once with multiprocessing.
 
 ## Installation
 Installation requires Python 2.6+ or Python 3.4+.
-
 The best way to install the latest stable version is with pip: `pip install tinyevolver`.
 
 If you want to install from source, simply clone into a directory, then from that directory run
