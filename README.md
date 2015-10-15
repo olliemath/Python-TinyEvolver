@@ -45,6 +45,8 @@ print(p.best.genes)
 ## Tips
 The majority of the work in constructing an evolutionary algorithm in TinyEvolver is the fitness function - and this is where the majority of the work is done by the CPU. You can thus speed up your code by speeding up the fitness function, whether that be by outsourcing to NumPy, writing C extensions, or simply making your function more efficient. Since TinyEvolver is written in pure Python, you could also run it under [PyPy](http://pypy.org/).
 
+The best way to discover TinyEvolver's features is through the iPython interactive interpreter - you can enter `Foo.` followed by the `tab` key to see possible completions of Foo, and `Foo?` to view its signature and docstrings. 
+
 ## Documentation
 TinyEvolver contains 3 classes: Individual, Population and IslandModel. A Population is a collection of Individuals and an IslandModel is a collection of Populations - both of these classes have methods for evolving with all variables having sensible defaults.
 

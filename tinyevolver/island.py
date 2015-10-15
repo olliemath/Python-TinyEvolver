@@ -97,7 +97,8 @@ class IslandModel(object):
 
         return out_pop
 
-    def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True, mig_freq=5):
+    def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True,
+               mig_size=5, mig_freq=5):
         """ This evolves the islands and cross-pollinates them with mig_size individuals every mig_freq generations.
         """
         for gen in range(ngen):
@@ -105,29 +106,29 @@ class IslandModel(object):
                 print("--- Generation %d ---" % gen)
             for pop in self.islands:
                 pop.step(ngen, gen, matepb, mutpb, indpb, scoping, tournsize, verbose)
-            if gen % mig_freq == 0:
-                Migrate(self.islands, mig_freq)
+            if mig_freq and gen % mig_freq == 0:
+                Migrate(self.islands, mig_size)
 
-    def _multi_evolve(self, pop, ngen, matepb, mutpb, indpb, scoping, tournsize, verbose, mig_freq,
-                      proc_no, pipe_in, pipe_out, result_queue):
+    def _multi_evolve(self, pop, ngen, matepb, mutpb, indpb, scoping, tournsize, verbose,
+                      mig_size, mig_freq, proc_no, pipe_in, pipe_out, result_queue):
         # Evolves and periodically puts/gets migrants from pipes
 
         for gen in range(ngen):
             if verbose:
                 print("--- Island %d, Generation %d ---" % (proc_no, gen))
             pop.step(ngen, gen, matepb, mutpb, indpb, scoping, tournsize, verbose)
-            if gen % mig_freq == 0:
-                MigratePipe(pop, mig_freq, pipe_in, pipe_out)
+            if mig_freq and gen % mig_freq == 0:
+                MigratePipe(pop, mig_size, pipe_in, pipe_out)
 
         if verbose:
             print("Evolution done: returning population to queue.")
         result_queue.put({'pop': list(pop), 'best': pop.best})
 
     def multi_evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0,
-                     tournsize=3, verbose=True, mig_freq=5):
+                     tournsize=3, verbose=True, mig_size=5, mig_freq=5):
         """ This is a multiprocessing version of the evolve method, assigning each island its
             own process. If running on Windows this needs to be called from inside a "__main__"
-            function. Even on 'nix it might not work in the interactive interpreter. """
+            function. """
         pipes = [Pipe(False) for _ in range(self.num_islands)]
         pipes_in = deque(pipe[0] for pipe in pipes)
         pipes_out = deque(pipe[1] for pipe in pipes)
@@ -139,7 +140,7 @@ class IslandModel(object):
             Process(
                 target=self._multi_evolve,
                 args=(self.islands[i], ngen, matepb, mutpb, indpb, scoping, tournsize,
-                      verbose, mig_freq, i, pipe_in, pipe_out, q)
+                      verbose, mig_size, mig_freq, i, pipe_in, pipe_out, q)
             )
             for i, (pipe_in, pipe_out) in enumerate(zip(pipes_in, pipes_out))
         ]
