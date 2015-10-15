@@ -144,7 +144,7 @@ def BoolMutate(bounds):
 
 def IntMutate(bounds):
     def mutator(ind, N, gen, ngen, indpb, scoping):
-        naive = int(ind[N] + random.normal(0, 1))
+        naive = int(ind[N] + random.normalvariate(0, 1))
         return max(min(naive, bounds[1]), bounds[0])
     return mutator
 
