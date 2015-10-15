@@ -32,22 +32,22 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
 
-        'Intended Audience :: Scientists',
+        'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
-        'Topic :: Software Development'
-        'Topic :: Genetic Algorithms',
-        'Topic :: Optimization',
-        'Topic :: Modelling',
+        'Intended Audience :: Education',
+        'Topic :: Scientific/Engineering',
 
-        'License :: OSI Approved :: GNU GPL V.2',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
 
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
 
-    keywords='genetic algorithms optimization',
+    keywords=['genetic', 'evolution', 'algorithms', 'optimization'],
 
     packages=['tinyevolver'],
 )
