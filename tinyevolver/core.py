@@ -151,8 +151,9 @@ def IntMutate(bounds):
 
 def FloatMutate(bounds):
     def mutator(ind, N, gen, ngen, indpb, scoping):
-        return random.uniform((ind[N] - bounds[0]) * (1 - gen / ngen) ** scoping,
-                              (bounds[1] - ind[N]) * (1 - gen / ngen) ** scoping)
+        if random.random() < 0.5:
+            return ind[N] + (bounds[1] - ind[N]) * random.random() * (1 - gen / ngen) ** scoping
+        return ind[N] - (ind[N] - bounds[0]) * random.random() * (1 - gen / ngen) ** scoping
     return mutator
 
 
