@@ -17,11 +17,15 @@ But simple doesn't mean featureless - individuals can have genes of mixed type, 
 can be generated on the fly or from old data, and one can evolve many populations at
 once with multiprocessing. 
 
+## Website
+
+https://github.com/olliemath/Python-TinyEvolver/
+
 ## Installation
 Installation requires Python 2.6+ or Python 3.4+.
 The best way to install the latest stable version is with pip: `pip install tinyevolver`.
 
-If you want to install from source, simply clone into a directory, then from that directory run
+If you want to install from source, simply clone the github repo into a directory, then from that directory run
 ```
 python setup.py install
 ```
@@ -60,7 +64,7 @@ Attributes:
 - `individual.valid` is True only if `individual.fitness` is present. 
 
 Methods:
-- Individuals have many of the methods of lists: you can get/set their genes with indices or slices, iterate over them, put them into `len`, copy them, and put them into any other Python function requiring only these.
+- Individuals have many of the methods of lists: you can get/set their genes with indices or slices, iterate over them, put them into `len`, copy them, and put them into any other Python function requiring only these (e.g. random.sample(individual) will return a random sample of the genes).
 
 ### Population
 Create an instance with `Population(prototype, gene_bounds, fitness_func)`, where
