@@ -73,31 +73,31 @@ class Individual(object):
 
 
 # Generators for individual genes
-def BoolGenerator(bounds):
+def bool_generator(bounds):
     def generator():
         return bool(random.getrandbits(1))
     return generator
 
 
-def IntGenerator(bounds):
+def int_generator(bounds):
     def generator():
         return random.randint(*bounds)
     return generator
 
 
-def FloatGenerator(bounds):
+def float_generator(bounds):
     def generator():
         return random.uniform(*bounds)
     return generator
 
 
-def Generator(g, bounds):
+def generator(g, bounds):
     if type(g) is bool:
-        return BoolGenerator(bounds)
+        return bool_generator(bounds)
     elif type(g) is int:
-        return IntGenerator(bounds)
+        return int_generator(bounds)
     elif type(g) is float:
-        return FloatGenerator(bounds)
+        return float_generator(bounds)
     else:
         raise TypeError("Prototype genes must be float, int or boolean.")
 
@@ -106,35 +106,35 @@ typecodes = {bool: 'b', int: 'i', float: 'd'}
 
 
 # Mating functions - gene by gene
-def BoolMate(ind1, ind2, N, a=0.5, b=0.5, cutoff=1):
+def bool_mate(ind1, ind2, N, a=0.5, b=0.5, cutoff=1):
     if N <= cutoff:
         return ind2[N], ind1[N]
     return ind1[N], ind2[N]
 
 
-def IntMate(ind1, ind2, N, a=0.5, b=0.5, cutoff=1):
+def int_mate(ind1, ind2, N, a=0.5, b=0.5, cutoff=1):
     if N <= cutoff:
         return ind2[N], ind1[N]
     return ind1[N], ind2[N]
 
 
-def FloatMate(ind1, ind2, N, a=0.5, b=0.5, cutoff=1):
+def float_mate(ind1, ind2, N, a=0.5, b=0.5, cutoff=1):
     return a * ind1[N] + b * ind2[N], b * ind1[N] + a * ind2[N]
 
 
-def Mater(g):
+def mater(g):
     if type(g) is bool:
-        return BoolMate
+        return bool_mate
     elif type(g) is int:
-        return IntMate
+        return int_mate
     elif type(g) is float:
-        return FloatMate
+        return float_mate
     else:
         raise TypeError("Prototype genes must be float, int or boolean.")
 
 
 # Mutating functions - gene by gene
-def BoolMutate(bounds):
+def bool_mutate(bounds):
     def mutator(ind, N, gen, ngen, indpb, scoping):
         if random.random() < indpb:
             return not ind[N]
@@ -142,14 +142,14 @@ def BoolMutate(bounds):
     return mutator
 
 
-def IntMutate(bounds):
+def int_mutate(bounds):
     def mutator(ind, N, gen, ngen, indpb, scoping):
         naive = int(ind[N] + random.normalvariate(0, 1))
         return max(min(naive, bounds[1]), bounds[0])
     return mutator
 
 
-def FloatMutate(bounds):
+def float_mutate(bounds):
     def mutator(ind, N, gen, ngen, indpb, scoping):
         if random.random() < 0.5:
             return ind[N] + (bounds[1] - ind[N]) * random.random() * (1 - gen / ngen) ** scoping
@@ -157,13 +157,13 @@ def FloatMutate(bounds):
     return mutator
 
 
-def Mutator(g, bounds):
+def mutator(g, bounds):
     if type(g) is bool:
-        return BoolMutate(bounds)
+        return bool_mutate(bounds)
     elif type(g) is int:
-        return IntMutate(bounds)
+        return int_mutate(bounds)
     elif type(g) is float:
-        return FloatMutate(bounds)
+        return float_mutate(bounds)
     else:
         raise TypeError("Prototype genes must be float, int or boolean.")
 
@@ -182,7 +182,7 @@ class Population(object):
             individuals - a list of Individual instances
             best - the fittest individual of all time
     """
-            
+
     def __init__(self, prototype, gene_bounds, fitness_func):
         self.individuals = []
         self._prototype = prototype
@@ -196,9 +196,9 @@ class Population(object):
             self._bounds = [None for _ in range(self._indsize)]
         self._fitness = fitness_func
         self._typecode = typecodes[type(prototype[0])] if len(set([type(g) for g in prototype])) == 1 else None
-        self._generators = [Generator(g, self._bounds[N]) for N, g in enumerate(prototype)]
-        self._maters = [Mater(g) for g in prototype]
-        self._mutators = [Mutator(g, self._bounds[N]) for N, g in enumerate(prototype)]
+        self._generators = [generator(g, self._bounds[N]) for N, g in enumerate(prototype)]
+        self._maters = [mater(g) for g in prototype]
+        self._mutators = [mutator(g, self._bounds[N]) for N, g in enumerate(prototype)]
         self.best = None
 
     def _generator(self):
@@ -209,7 +209,7 @@ class Population(object):
             Arguments:
                 base_population - if not null, the popsize variable will be ignored and members of this object used as individuals. This should be a Population or a list of items able to be coerced to Individuals.
                 popsize - if base_population is null, then this is the number of Individuals that will be generated ab initio for the Population.
-        """        
+        """
         if base_population:
             self.popsize = len(base_population)
             if self._typecode:
@@ -275,7 +275,7 @@ class Population(object):
                 verbose - Boolean - print statistics to screen (note: this may slow the evolution)
         """
         for gen in range(ngen):
-            self.individuals = Select(self, tournsize=tournsize)
+            self.individuals = select(self, tournsize=tournsize)
             for ind1, ind2 in zip(self[::2], self[1::2]):
                 if random.random() < matepb:
                     self._mate(ind1, ind2)
@@ -297,9 +297,9 @@ class Population(object):
                 print("    Fitest: %f --- Variance: %f " % (max(fits), sum(sqdev) / len(sqdev)))
 
     def step(self, ngen=40, gen=0, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True):
-        """ This is similar to the 'evolve' method, but evolves the population exactly one generation. 
+        """ This is similar to the 'evolve' method, but evolves the population exactly one generation.
             The ngen and gen parameters are required for scoping (see Population.evolve). """
-        self.individuals = Select(self, tournsize=tournsize)
+        self.individuals = select(self, tournsize=tournsize)
         for ind1, ind2 in zip(self[::2], self[1::2]):
             if random.random() < matepb:
                 self._mate(ind1, ind2)
@@ -321,7 +321,7 @@ class Population(object):
 
 
 # Select best individuals
-def Select(pop, tournsize=3, newsize=None):
+def select(pop, tournsize=3, newsize=None):
     if newsize is None:
         newsize = len(pop)
     return [

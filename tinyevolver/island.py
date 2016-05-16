@@ -23,7 +23,7 @@ from multiprocessing import Pipe, Process, Queue
 from collections import deque
 
 
-def Migrate(poplist, num_migrants):
+def migrate(poplist, num_migrants):
     """ Migrates individuals between populations in poplist. """
     popsize = poplist[0].popsize
 
@@ -33,7 +33,7 @@ def Migrate(poplist, num_migrants):
             poplist[n][i], poplist[n-1][i] = poplist[n-1][i], poplist[n][i]
 
 
-def MigratePipe(island, num_migrants, pipe_in, pipe_out):
+def migrate_pipe(island, num_migrants, pipe_in, pipe_out):
     """ This implements the migrate function along pipes in a multiprocessing setup. """
     migrant_indices = random.sample(range(island.popsize), num_migrants)
     emigrants = [copy(island[n]) for n in migrant_indices]
@@ -107,7 +107,7 @@ class IslandModel(object):
             for pop in self.islands:
                 pop.step(ngen, gen, matepb, mutpb, indpb, scoping, tournsize, verbose)
             if mig_freq and gen % mig_freq == 0:
-                Migrate(self.islands, mig_size)
+                migrate(self.islands, mig_size)
 
     def _multi_evolve(self, pop, ngen, matepb, mutpb, indpb, scoping, tournsize, verbose,
                       mig_size, mig_freq, proc_no, pipe_in, pipe_out, result_queue):
@@ -118,7 +118,7 @@ class IslandModel(object):
                 print("--- Island %d, Generation %d ---" % (proc_no, gen))
             pop.step(ngen, gen, matepb, mutpb, indpb, scoping, tournsize, verbose)
             if mig_freq and gen % mig_freq == 0:
-                MigratePipe(pop, mig_size, pipe_in, pipe_out)
+                migrate_pipe(pop, mig_size, pipe_in, pipe_out)
 
         if verbose:
             print("Evolution done: returning population to queue.")
