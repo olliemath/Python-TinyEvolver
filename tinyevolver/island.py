@@ -18,7 +18,7 @@
 from copy import copy
 import random
 
-from .core import Population, Select
+from .core import Population, select
 from multiprocessing import Pipe, Process, Queue
 from collections import deque
 
@@ -76,11 +76,11 @@ class IslandModel(object):
         proto_pop = self.islands[0]
         out_pop = Population(proto_pop._prototype, proto_pop._bounds, proto_pop._fitness)
 
-        # Select the individuals for the output
+        # select the individuals for the output
         individuals = []
         for pop in self.islands:
             individuals += [copy(ind) for ind in pop.individuals]
-        out_pop.populate(base_population=Select(individuals, tournsize, newsize=len(proto_pop)))
+        out_pop.populate(base_population=select(individuals, tournsize, newsize=len(proto_pop)))
 
         return out_pop
 
