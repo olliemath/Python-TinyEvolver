@@ -21,8 +21,13 @@ import random
 
 
 class Individual(object):
-    """ An 'indivudal' class. Behaves like/is initialised with an array/list of genes,
-        but also contains methods for setting/getting/deleting fitness. """
+    """
+    An 'indivudal' class. Behaves like/is initialised with an array/list
+    of genes, but also contains methods for setting/getting/deleting fitness.
+    """
+
+    __slots__ = ["genes", "_fitness", "_valid"]
+
     def __init__(self, gene_list):
         self.genes = gene_list
         self._fitness = None
@@ -73,31 +78,13 @@ class Individual(object):
 
 
 # Generators for individual genes
-def bool_generator(bounds):
-    def generator():
+def generator(gene_type, bounds):
+    if gene_type is bool:
         return bool(random.getrandbits(1))
-    return generator
-
-
-def int_generator(bounds):
-    def generator():
+    elif gene_type is int:
         return random.randint(*bounds)
-    return generator
-
-
-def float_generator(bounds):
-    def generator():
+    elif gene_type is float:
         return random.uniform(*bounds)
-    return generator
-
-
-def generator(g, bounds):
-    if type(g) is bool:
-        return bool_generator(bounds)
-    elif type(g) is int:
-        return int_generator(bounds)
-    elif type(g) is float:
-        return float_generator(bounds)
     else:
         raise TypeError("Prototype genes must be float, int or boolean.")
 
@@ -170,17 +157,18 @@ def mutator(g, bounds):
 
 # Population class with methods for generate, mate, mutate
 class Population(object):
-    """ Population to contain Indivuduals and methods for evolution.
-        Arguments:
-            prototype - a flat list of float, integer or boolean genes
-            bounds - a list of pairs (l, u) of bounds for the selection/mutation of genes
-            fitness_func - a function which takes a flat list of genes and returns a numeric fitness value
-        Methods:
-            populate - add Individuals to this class
-            evolve - evolve the individuals using the generated select, mate, mutate functions
-        Attributes:
-            individuals - a list of Individual instances
-            best - the fittest individual of all time
+    """
+    Population to contain Indivuduals and methods for evolution.
+    Arguments:
+        prototype - a flat list of float, integer or boolean genes
+        bounds - a list of pairs (l, u) of bounds for the selection/mutation of genes
+        fitness_func - a function which takes a flat list of genes and returns a numeric fitness value
+    Methods:
+        populate - add Individuals to this class
+        evolve - evolve the individuals using the generated select, mate, mutate functions
+    Attributes:
+        individuals - a list of Individual instances
+        best - the fittest individual of all time
     """
 
     def __init__(self, prototype, gene_bounds, fitness_func):
@@ -196,19 +184,24 @@ class Population(object):
             self._bounds = [None for _ in range(self._indsize)]
         self._fitness = fitness_func
         self._typecode = typecodes[type(prototype[0])] if len(set([type(g) for g in prototype])) == 1 else None
-        self._generators = [generator(g, self._bounds[N]) for N, g in enumerate(prototype)]
         self._maters = [mater(g) for g in prototype]
         self._mutators = [mutator(g, self._bounds[N]) for N, g in enumerate(prototype)]
         self.best = None
 
     def _generator(self):
-        return [self._generators[N]() for N in range(self._indsize)]
+        return [generator(type(g), bounds) for g, bounds in
+                zip(self._prototype, self._bounds)]
 
     def populate(self, popsize=300, base_population=None):
-        """ Add Individuals to the population.
-            Arguments:
-                base_population - if not null, the popsize variable will be ignored and members of this object used as individuals. This should be a Population or a list of items able to be coerced to Individuals.
-                popsize - if base_population is null, then this is the number of Individuals that will be generated ab initio for the Population.
+        """
+        Add Individuals to the population.
+        :param base_population: if not None, the popsize variable will be
+            ignored and members of this object used as individuals. This
+            should be a Population or a list of items able to be coerced
+            to Individuals.
+        :param popsize: if base_population is None, then this is the number
+            of Individuals that will be generated ab initio for the
+            Population.
         """
         if base_population:
             self.popsize = len(base_population)
@@ -216,6 +209,7 @@ class Population(object):
                 self.individuals = [Individual(array(self._typecode, ind)) for ind in base_population]
             else:
                 self.individuals = [Individual(list(ind)) for ind in base_population]
+
         else:
             self.popsize = popsize
             if self._typecode:
@@ -264,15 +258,16 @@ class Population(object):
         return new
 
     def evolve(self, ngen=40, matepb=0.3, mutpb=0.2, indpb=0.05, scoping=0, tournsize=3, verbose=True):
-        """ Evolve the population in place
-            Arguments:
-                ngen - Positive integer - number of generations to evolve
-                matepb - Float between 0 and 1 - probability of individual mating
-                mutpb - Float between 0 and 1 - probability of individual mutation
-                indpb - Float between 0 and 1 - probability of individual boolean genes flipping
-                scoping - Float non-negative - more positive means a greater decrease in variability of genes as time goes on
-                tournsize - Positive integer - size of random pools to select best individuals from
-                verbose - Boolean - print statistics to screen (note: this may slow the evolution)
+        """
+        Evolve the population in place
+        :param ngen: Positive integer - number of generations to evolve
+        :param matepb: Float between 0 and 1 - probability of individual mating
+        :param mutpb: Float between 0 and 1 - probability of individual mutation
+        :param indpb: Float between 0 and 1 - probability of individual boolean genes flipping
+        :param scoping:  Float non-negative - more positive means a greater decrease in
+            variability of genes as time goes on
+        :param tournsize: Positive integer - size of random pools to select best individuals from
+        :param verbose: Boolean - print statistics to screen (note: this may slow the evolution)
         """
         for gen in range(ngen):
             self.individuals = select(self, tournsize=tournsize)
