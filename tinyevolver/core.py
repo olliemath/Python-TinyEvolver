@@ -15,7 +15,6 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 from __future__ import print_function, division
-
 try:
     from itertools import izip
 except ImportError:
@@ -26,6 +25,7 @@ from array import array
 from copy import copy
 from functools import partial
 import random
+
 
 
 class Individual(object):
@@ -57,6 +57,7 @@ class Individual(object):
         new = Individual(copy(self.genes))
         if self.valid:
             new.fitness = self.fitness
+            new.valid = True
         return new
 
 
@@ -90,19 +91,19 @@ def typecode(gene):
 # a list of appropriate functions when we initialise the population.
 # Because they all have the same signature we can apply them all
 # in a single loop without if-else statements. This is speedy!
-def bool_mate(gene1, gene2, n, a=0.5, b=0.5, cutoff=1):
+def bool_mate(gene1, gene2, n, a, b, cutoff):
     if n <= cutoff:
         return gene2, gene1
     return gene1, gene2
 
 
-def int_mate(gene1, gene2, n, a=0.5, b=0.5, cutoff=1):
+def int_mate(gene1, gene2, n, a, b, cutoff):
     if n <= cutoff:
         return gene2, gene1
     return gene1, gene2
 
 
-def float_mate(gene1, gene2, n, a=0.5, b=0.5, cutoff=1):
+def float_mate(gene1, gene2, n, a, b, cutoff):
     return a * gene1 + b * gene2, b * gene1 + a * gene2
 
 
@@ -137,7 +138,7 @@ def float_mutator(bounds, gene, gen, ngen, indpb, scoping):
 
 def mutator(g, bounds):
     if type(g) is bool:
-        return bool_mutator
+        return partial(bool_mutator, bounds)
     elif type(g) is int:
         return partial(int_mutator, bounds)
     elif type(g) is float:
@@ -235,10 +236,10 @@ class Population(object):
     def _evaluate(self):
         for ind in self.individuals:
             if not ind.valid:
-                ind.fitness = self._fitness(ind)
+                ind.fitness, ind.valid = self._fitness(ind), True
         # Also update the record of the best individual
         best = max(self.individuals, key=lambda ind: ind.fitness)
-        if not self.best or best.fitness > self.best.fitness:
+        if self.best is None or best.fitness > self.best.fitness:
             self.best = best
 
     def __getitem__(self, key):
