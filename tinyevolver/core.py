@@ -27,7 +27,6 @@ from functools import partial
 import random
 
 
-
 class Individual(object):
     """
     An 'indivudal' class. Behaves like/is initialised with an array/list
