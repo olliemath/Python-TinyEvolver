@@ -14,7 +14,7 @@ with open(path.join(here, 'README.md'), 'r') as f:
 
 setup(
     name='tinyevolver',
-    version='0.1',
+    version='0.2',
 
     description='A simple, tiny engine for creating genetic algorithms.',
     long_description=long_description,
