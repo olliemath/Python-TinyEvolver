@@ -219,15 +219,10 @@ class Population(object):
             if not ind.valid:
                 ind.fitness, ind.valid = self._fitness(ind), True
 
-                if self.best is None or ind.fitness > self.best.fitness:
-                    self.best = copy(ind)
-        """
-
         # Also update the record of the best individual
         best = max(self.individuals, key=lambda ind: ind.fitness)
         if self.best is None or best.fitness > self.best.fitness:
             self.best = copy(best)
-        """
 
     def __getitem__(self, key):
         return self.individuals[key]
