@@ -18,7 +18,7 @@
 from copy import copy
 import random
 
-from .core import Population, select
+from ._core import Population, select
 from multiprocessing import Pipe, Process, Queue
 from collections import deque
 
@@ -63,8 +63,12 @@ class IslandModel(object):
 
     def __init__(self, poplist):
         if len(poplist) < 2:
-            raise ValueError("At least two populations required for this model")
+            raise AttributeError("At least two populations required for IslandModel")
         else:
+            if type(poplist) is not list or set(map(type, poplist)) != {Population}:
+                raise TypeError("IslandModel requires a list of Population instances")
+            if 0 in map(len, poplist):
+                raise AttributeError("IslandModel received an empty population.")
             self.islands = poplist
             self.num_islands = len(poplist)
 
