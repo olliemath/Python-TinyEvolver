@@ -23,14 +23,14 @@ except ImportError:
 
 from array import array
 from copy import copy
-from functools import partial
 import random
 
 
 class Individual(object):
     """
     An 'indivudal' class. Behaves like/is initialised with an array/list
-    of genes, but also contains methods for setting/getting/deleting fitness.
+    of genes, but also contains a fitness and a 'valid' attribute: which
+    indicates whether the current fitness applies to the current genes.
     """
 
     __slots__ = ["genes", "fitness", "valid"]
@@ -85,65 +85,38 @@ def typecode(gene):
 
 
 # Mating functions - gene by gene
-# A note on the signatures: essentially we avoid a long series of
-# if statements when applying each function to each gene by recording
-# a list of appropriate functions when we initialise the population.
-# Because they all have the same signature we can apply them all
-# in a single loop without if-else statements. This is speedy!
-def bool_mate(gene1, gene2, n, a, b, cutoff):
+def bool_mate(gene1, gene2, n, cutoff):
     if n <= cutoff:
         return gene2, gene1
     return gene1, gene2
 
 
-def int_mate(gene1, gene2, n, a, b, cutoff):
+def int_mate(gene1, gene2, n, cutoff):
     if n <= cutoff:
         return gene2, gene1
     return gene1, gene2
 
 
-def float_mate(gene1, gene2, n, a, b, cutoff):
+def float_mate(gene1, gene2, a, b):
     return a * gene1 + b * gene2, b * gene1 + a * gene2
 
 
-def mater(g):
-    if type(g) is bool:
-        return bool_mate
-    elif type(g) is int:
-        return int_mate
-    elif type(g) is float:
-        return float_mate
-    else:
-        raise TypeError("Prototype genes must be float, int or boolean.")
-
-
 # Mutating functions - gene by gene
-def bool_mutator(bounds, gene, gen, ngen, indpb, scoping):
+def bool_mutator(gene, indpb):
     if random.random() < indpb:
         return not gene
     return gene
 
 
-def int_mutator(bounds, gene, gen, ngen, indpb, scoping):
+def int_mutator(gene, bounds):
     naive = int(gene + random.normalvariate(0, 1))
     return max(min(naive, bounds[1]), bounds[0])
 
 
-def float_mutator(bounds, gene, gen, ngen, indpb, scoping):
+def float_mutator(gene, bounds, gen, ngen, scoping):
     if random.random() < 0.5:
         return gene + (bounds[1] - gene) * random.random() * (1 - gen / ngen) ** scoping
     return gene - (gene - bounds[0]) * random.random() * (1 - gen / ngen) ** scoping
-
-
-def mutator(g, bounds):
-    if type(g) is bool:
-        return partial(bool_mutator, bounds)
-    elif type(g) is int:
-        return partial(int_mutator, bounds)
-    elif type(g) is float:
-        return partial(float_mutator, bounds)
-
-    raise TypeError("Prototype genes must be float, int or boolean.")
 
 
 # Population class with methods for generate, mate, mutate
@@ -169,6 +142,8 @@ class Population(object):
         self.individuals = []
         self.popsize = 0
         self._prototype = prototype
+        self._typelist = list(map(type, prototype))
+        self._typeset = set(self._typelist)
         self._indsize = len(prototype)
         self._fitness = fitness_func
         self.best = None
@@ -180,13 +155,10 @@ class Population(object):
                 raise AttributeError("len(prototype) != len(bounds)")
             self._bounds = gene_bounds
 
-        if len(set(map(type, prototype))) == 1:
+        if len(self._typeset) == 1:
             self._typecode = typecode(prototype[0])
         else:
             self._typecode = None
-
-        self._maters = [mater(g) for g in prototype]
-        self._mutators = [mutator(g, self._bounds[n]) for n, g in enumerate(prototype)]
 
     def _generator(self):
         return [generator(type(g), bounds) for g, bounds in
@@ -225,21 +197,37 @@ class Population(object):
         cutoff = random.randint(1, self._indsize - 1)
         a = random.random()
         b = 1 - a
-        for n, (gene1, gene2, mat_func) in enumerate(izip(ind1, ind2, self._maters)):
-            ind1[n], ind2[n] = mat_func(gene1, gene2, n, a, b, cutoff)
+        for n, (gene1, gene2, genetype) in enumerate(izip(ind1, ind2, self._typelist)):
+            if genetype is float:
+                ind1[n], ind2[n] = float_mate(gene1, gene2, a, b)
+            elif genetype is int:
+                ind1[n], ind2[n] = int_mate(gene1, gene2, n, cutoff)
+            elif genetype is bool:
+                ind1[n], ind2[n] = bool_mate(gene1, gene2, n, cutoff)
 
     def _mutate(self, ind, gen, ngen, indpb, scoping):
-        for n, (gene, mut_func) in enumerate(izip(ind, self._mutators)):
-            ind[n] = mut_func(gene, gen, ngen, indpb, scoping)
+        for n, (gene, genetype) in enumerate(izip(ind, self._typelist)):
+            if genetype is float:
+                ind[n] = float_mutator(gene, self._bounds[n], gen, ngen, scoping)
+            elif genetype is int:
+                ind[n] = int_mutator(gene, self._bounds[n])
+            elif genetype is bool:
+                ind[n] = bool_mutator(gene, indpb)
 
     def _evaluate(self):
         for ind in self.individuals:
             if not ind.valid:
                 ind.fitness, ind.valid = self._fitness(ind), True
+
+                if self.best is None or ind.fitness > self.best.fitness:
+                    self.best = copy(ind)
+        """
+
         # Also update the record of the best individual
         best = max(self.individuals, key=lambda ind: ind.fitness)
         if self.best is None or best.fitness > self.best.fitness:
-            self.best = best
+            self.best = copy(best)
+        """
 
     def __getitem__(self, key):
         return self.individuals[key]
@@ -330,6 +318,7 @@ class Population(object):
 
 
 # Select best individuals
+# Defined separately for use with Island class
 def select(pop, tournsize=3, newsize=None):
     if newsize is None:
         newsize = len(pop)
